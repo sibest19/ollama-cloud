@@ -1,0 +1,23 @@
+{
+    "domain": "ollama_cloud",
+    "name": "Ollama Cloud",
+    "after_dependencies": [
+        "assist_pipeline",
+        "intent"
+    ],
+    "codeowners": [
+        "@simoneandreani"
+    ],
+    "config_flow": true,
+    "dependencies": [
+        "conversation"
+    ],
+    "documentation": "https://github.com/simoneandreani/hacs-integrations",
+    "integration_type": "service",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/simoneandreani/hacs-integrations/issues",
+    "requirements": [
+        "ollama==0.5.1"
+    ],
+    "version": "1.0.0"
+}

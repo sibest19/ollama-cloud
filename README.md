@@ -1,46 +1,68 @@
-# Notice
+# Ollama Cloud Integration for Home Assistant
 
-The component and platforms in this repository are not meant to be used by a
-user, but as a "blueprint" that custom component developers can build
-upon, to make more awesome stuff.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-HAVE FUN! 😎
+This custom integration allows you to use [Ollama Cloud](https://ollama.com) as a conversation agent and AI task provider in Home Assistant.
 
-## Why?
+## Features
 
-This is simple, by having custom_components look (README + structure) the same
-it is easier for developers to help each other and for users to start using them.
+- **Conversation Agent**: Use Ollama Cloud models as your Home Assistant voice assistant
+- **AI Task Support**: Generate structured data using Ollama Cloud models
+- **Multiple Models**: Access cloud-hosted models including LLaMA 3.3, Qwen 3, DeepSeek R1, Mistral Large, and more
+- **Streaming Responses**: Real-time streaming for responsive conversations
+- **Tool Calling**: Control Home Assistant devices through natural language
+- **Thinking Mode**: Optional reasoning mode for improved response quality
 
-If you are a developer and you want to add things to this "blueprint" that you think more
-developers will have use for, please open a PR to add it :)
+## Installation
 
-## What?
+### HACS (Recommended)
 
-This repository contains multiple files, here is a overview:
+1. Open HACS in your Home Assistant instance
+2. Click on "Integrations"
+3. Click the three dots in the top right corner
+4. Select "Custom repositories"
+5. Add this repository URL and select "Integration" as the category
+6. Click "Add"
+7. Search for "Ollama Cloud" and install it
+8. Restart Home Assistant
 
-File | Purpose | Documentation
--- | -- | --
-`.devcontainer.json` | Used for development/testing with Visual Studio Code. | [Documentation](https://code.visualstudio.com/docs/remote/containers)
-`.github/ISSUE_TEMPLATE/*.yml` | Templates for the issue tracker | [Documentation](https://help.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository)
-`custom_components/integration_blueprint/*` | Integration files, this is where everything happens. | [Documentation](https://developers.home-assistant.io/docs/creating_component_index)
-`CONTRIBUTING.md` | Guidelines on how to contribute. | [Documentation](https://help.github.com/en/github/building-a-strong-community/setting-guidelines-for-repository-contributors)
-`LICENSE` | The license file for the project. | [Documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/licensing-a-repository)
-`README.md` | The file you are reading now, should contain info about the integration, installation and configuration instructions. | [Documentation](https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax)
-`requirements.txt` | Python packages used for development/lint/testing this integration. | [Documentation](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
+### Manual Installation
 
-## How?
+1. Copy the `custom_components/ollama_cloud` directory to your Home Assistant `custom_components` folder
+2. Restart Home Assistant
 
-1. Create a new repository in GitHub, using this repository as a template by clicking the "Use this template" button in the GitHub UI.
-1. Open your new repository in Visual Studio Code devcontainer (Preferably with the "`Dev Containers: Clone Repository in Named Container Volume...`" option).
-1. Rename all instances of the `integration_blueprint` to `custom_components/<your_integration_domain>` (e.g. `custom_components/awesome_integration`).
-1. Rename all instances of the `Integration Blueprint` to `<Your Integration Name>` (e.g. `Awesome Integration`).
-1. Run the `scripts/develop` to start HA and test out your new integration.
+## Configuration
 
-## Next steps
+1. Go to **Settings** → **Devices & Services**
+2. Click **Add Integration**
+3. Search for "Ollama Cloud"
+4. Enter your Ollama Cloud API key (get one at https://ollama.com/settings/keys)
+5. The integration will automatically create a conversation agent and AI task entity
 
-These are some next steps you may want to look into:
-- Add tests to your integration, [`pytest-homeassistant-custom-component`](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component) can help you get started.
-- Add brand images (logo/icon) to https://github.com/home-assistant/brands.
-- Create your first release.
-- Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
-- Submit your integration to [HACS](https://hacs.xyz/docs/publish/start).
+## Available Models
+
+The integration supports various cloud models hosted on Ollama Cloud:
+
+- LLaMA 3.3 (70B)
+- LLaMA 3.1 (405B)
+- Qwen 3 (235B)
+- QwQ (32B)
+- DeepSeek R1 (671B)
+- Mistral Large (123B)
+- Command R+ (104B)
+- GPT-OSS (120B)
+
+## Options
+
+Each conversation agent/AI task can be configured with:
+
+- **Model**: Select which cloud model to use
+- **Instructions**: Custom prompt to guide the LLM behavior
+- **Control Home Assistant**: Enable tool calling to control devices
+- **Max History Messages**: Number of conversation turns to keep in context
+- **Think Before Responding**: Enable reasoning mode for improved responses
+
+## Requirements
+
+- Home Assistant 2025.2.4 or later
+- An Ollama Cloud API key
