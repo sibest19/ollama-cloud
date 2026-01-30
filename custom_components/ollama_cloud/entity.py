@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator, AsyncIterator, Callable
 import json
 import logging
+from collections.abc import AsyncGenerator, AsyncIterator, Callable
 from typing import Any
 
 import ollama
 import voluptuous as vol
-from voluptuous_openapi import convert
-
 from homeassistant.components import conversation
 from homeassistant.config_entries import ConfigSubentry
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import device_registry as dr, llm
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import llm
 from homeassistant.helpers.entity import Entity
+from voluptuous_openapi import convert
 
 from . import OllamaCloudConfigEntry
 from .const import (
@@ -48,7 +48,8 @@ def _format_tool(
 
 
 def _fix_invalid_arguments(value: Any) -> Any:
-    """Attempt to repair incorrectly formatted json function arguments.
+    """
+    Attempt to repair incorrectly formatted json function arguments.
 
     Small models may produce invalid argument values which we attempt to repair.
     """
@@ -65,7 +66,8 @@ def _fix_invalid_arguments(value: Any) -> Any:
 
 
 def _parse_tool_args(arguments: dict[str, Any]) -> dict[str, Any]:
-    """Rewrite ollama tool arguments.
+    """
+    Rewrite ollama tool arguments.
 
     This function improves tool use quality by fixing common mistakes made by
     tool use models. This will repair invalid json arguments and omit
@@ -132,7 +134,8 @@ def _convert_content(
 async def _transform_stream(
     result: AsyncIterator[ollama.ChatResponse],
 ) -> AsyncGenerator[conversation.AssistantContentDeltaDict]:
-    """Transform the response stream into HA format.
+    """
+    Transform the response stream into HA format.
 
     An Ollama streaming response may come in chunks like this:
 
@@ -260,7 +263,8 @@ class OllamaCloudBaseLLMEntity(Entity):
                 break
 
     def _trim_history(self, message_history: MessageHistory, max_messages: int) -> None:
-        """Trim excess messages from a single history.
+        """
+        Trim excess messages from a single history.
 
         This sets the max history to allow a configurable size history may take
         up in the context window.

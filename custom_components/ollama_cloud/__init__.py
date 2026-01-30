@@ -7,7 +7,6 @@ import logging
 
 import httpx
 import ollama
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY, Platform
 from homeassistant.core import HomeAssistant

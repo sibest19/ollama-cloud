@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Mapping
 import logging
+from collections.abc import Mapping
 from typing import Any
 
 import httpx
 import ollama
 import voluptuous as vol
-
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigEntryState,
