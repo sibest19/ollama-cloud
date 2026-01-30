@@ -6,16 +6,16 @@
         "intent"
     ],
     "codeowners": [
-        "@simoneandreani"
+        "@sibest19"
     ],
     "config_flow": true,
     "dependencies": [
         "conversation"
     ],
-    "documentation": "https://github.com/simoneandreani/hacs-integrations",
+    "documentation": "https://github.com/sibest19/ollama-cloud",
     "integration_type": "service",
     "iot_class": "cloud_polling",
-    "issue_tracker": "https://github.com/simoneandreani/hacs-integrations/issues",
+    "issue_tracker": "https://github.com/sibest19/ollama-cloud/issues",
     "requirements": [
         "ollama==0.5.1"
     ],
