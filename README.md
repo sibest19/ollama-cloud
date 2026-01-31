@@ -1,7 +1,10 @@
+<p align="center">
+  <img src="images/icon.png" alt="Ollama" width="100">
+</p>
+
 # Ollama Cloud Integration for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sibest19&repository=ollama-cloud&category=integration)
 
 This custom integration allows you to use [Ollama Cloud](https://ollama.com) as a conversation agent and AI task provider in Home Assistant.
 
@@ -18,7 +21,7 @@ This custom integration allows you to use [Ollama Cloud](https://ollama.com) as 
 
 ### HACS (Recommended)
 
-1. Open HACS in your Home Assistant instance
+1. Open HACS in your Home Assistant instance [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sibest19&repository=ollama-cloud&category=integration)
 2. Click on "Integrations"
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
@@ -73,3 +76,7 @@ Each conversation agent/AI task can be configured with:
 
 - Home Assistant 2025.2.4 or later
 - An Ollama Cloud API key
+
+## Disclaimer
+
+This project is not affiliated with, endorsed by, or sponsored by Ollama, Inc. The Ollama name and logo are trademarks of Ollama, Inc. This integration is an independent, community-driven project that uses the publicly available Ollama Cloud API.
