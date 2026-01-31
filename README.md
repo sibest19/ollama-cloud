@@ -44,14 +44,20 @@ This custom integration allows you to use [Ollama Cloud](https://ollama.com) as 
 
 The integration supports various cloud models hosted on Ollama Cloud:
 
-- LLaMA 3.3 (70B)
-- LLaMA 3.1 (405B)
-- Qwen 3 (235B)
-- QwQ (32B)
-- DeepSeek R1 (671B)
-- Mistral Large (123B)
-- Command R+ (104B)
-- GPT-OSS (120B)
+- Cogito 2.1 (671B)
+- DeepSeek v3.1 (671B), v3.2
+- Devstral 2 (123B), Small 2 (24B)
+- Gemini 3 Pro/Flash Preview
+- Gemma 3 (4B, 12B, 27B)
+- GLM 4.6, 4.7
+- GPT-OSS (20B, 120B)
+- Kimi K2 (1T), K2.5, K2-Thinking
+- MiniMax M2, M2.1
+- Ministral 3 (3B, 8B, 14B)
+- Mistral Large 3 (675B)
+- Nemotron 3 Nano (30B)
+- Qwen 3 Coder (480B), Next (80B), VL (235B)
+- RNJ-1 (8B)
 
 ## Options
 
