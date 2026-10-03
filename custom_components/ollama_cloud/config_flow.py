@@ -219,11 +219,11 @@ class OllamaCloudSubentryFlowHandler(ConfigSubentryFlow):
                 _LOGGER.exception("Failed to get models from Ollama Cloud")
                 return self.async_abort(reason="cannot_connect")
 
-            # Show available cloud models, highlight those available on the API
+            # Ollama Cloud only lists cloud models, so show all of them, then any
+            # known models the API did not return
             models_to_list = [
                 SelectOptionDict(label=f"{m} (available)", value=m)
                 for m in sorted(available_models)
-                if m in MODEL_NAMES or "cloud" in m.lower()
             ] + [
                 SelectOptionDict(label=m, value=m)
                 for m in sorted(MODEL_NAMES)

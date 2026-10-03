@@ -13,7 +13,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ollama_cloud.const import CONF_MODEL, DOMAIN
+from custom_components.ollama_cloud.const import (
+    CONF_MODEL,
+    DEFAULT_MODEL,
+    DOMAIN,
+    MODEL_NAMES,
+)
 
 from .conftest import TEST_API_KEY
 
@@ -172,3 +177,31 @@ async def test_conversation_subentry_flow(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "My Agent"
     assert result["data"][CONF_MODEL] == "gpt-oss:120b"
+
+
+async def test_subentry_flow_lists_new_cloud_models(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_ollama_client: MagicMock,
+) -> None:
+    """Models Ollama Cloud returns are offered even if not in the built-in list."""
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    mock_ollama_client.list.return_value = {"models": [{"model": "brand-new-model"}]}
+
+    result = await hass.config_entries.subentries.async_init(
+        (mock_config_entry.entry_id, "conversation"),
+        context={"source": SOURCE_USER},
+    )
+
+    model_selector = next(
+        value
+        for key, value in result["data_schema"].schema.items()
+        if key == CONF_MODEL
+    )
+    offered = [option["value"] for option in model_selector.config["options"]]
+    assert "brand-new-model" in offered
+    # The built-in list still backs up the live one.
+    assert set(MODEL_NAMES) <= set(offered)
+    assert DEFAULT_MODEL in MODEL_NAMES
