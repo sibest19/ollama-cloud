@@ -247,6 +247,18 @@ class OllamaCloudBaseLLMEntity(Entity):
                     else llm.selector_serializer
                 ),
             )
+            # Ollama Cloud ignores `format`, so ask for the schema in the prompt too.
+            message_history.messages.insert(
+                0,
+                ollama.Message(
+                    role=MessageRole.SYSTEM.value,
+                    content=(
+                        "Respond only with a JSON object that matches this JSON "
+                        "schema, with no other text or formatting:\n"
+                        f"{json.dumps(output_format)}"
+                    ),
+                ),
+            )
 
         # Get response
         # To prevent infinite loops, we limit the number of iterations

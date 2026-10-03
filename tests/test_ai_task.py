@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import MagicMock
 
 import ollama
@@ -53,4 +54,9 @@ async def test_generate_structured_data(
         "additionalProperties": False,
     }
     assert result.data == {"capital": "Rome", "population_millions": 2.8}
-    assert mock_ollama_client.chat.await_args.kwargs["format"] == expected_schema
+    chat_kwargs = mock_ollama_client.chat.await_args.kwargs
+    assert chat_kwargs["format"] == expected_schema
+    # Ollama Cloud ignores `format`, so the schema is also given in the prompt.
+    first_message = chat_kwargs["messages"][0]
+    assert first_message["role"] == "system"
+    assert json.dumps(expected_schema) in first_message["content"]
