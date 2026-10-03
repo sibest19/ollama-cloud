@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import ollama
 import pytest
+import voluptuous as vol
 from homeassistant.components import conversation
+from homeassistant.helpers import llm
 
 from custom_components.ollama_cloud.entity import (
     _convert_content,
     _fix_invalid_arguments,
+    _format_tool,
     _parse_tool_args,
 )
 from custom_components.ollama_cloud.models import MessageHistory, MessageRole
@@ -41,6 +46,36 @@ def test_parse_tool_args_drops_empty_and_repairs_json() -> None:
         }
     )
     assert result == {"name": "kitchen", "list": ["x"]}
+
+
+def test_format_tool_converts_parameters_to_json_schema() -> None:
+    """Tool parameters become a JSON schema the Ollama client accepts."""
+    tool = MagicMock(spec=llm.Tool)
+    tool.name = "set_brightness"
+    tool.description = "Set a light's brightness"
+    tool.parameters = vol.Schema(
+        {
+            vol.Required("name"): str,
+            vol.Optional("brightness"): vol.All(vol.Coerce(int), vol.Range(0, 100)),
+        }
+    )
+
+    spec = _format_tool(tool, llm.selector_serializer)
+
+    assert spec["type"] == "function"
+    assert spec["function"]["name"] == "set_brightness"
+    assert spec["function"]["description"] == "Set a light's brightness"
+    assert spec["function"]["parameters"] == {
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "brightness": {"type": "integer", "minimum": 0, "maximum": 100},
+        },
+        "required": ["name"],
+        "additionalProperties": False,
+    }
+    # The Ollama client validates tools with pydantic; this must not raise.
+    ollama.Tool.model_validate(spec)
 
 
 def test_convert_content_roundtrips_roles() -> None:

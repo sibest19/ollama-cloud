@@ -15,7 +15,13 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import llm
 from homeassistant.helpers.entity import Entity
-from voluptuous_openapi import convert
+
+try:
+    # Home Assistant 2026.9 replaced voluptuous with probatio, whose schemas
+    # voluptuous_openapi cannot convert.
+    from probatio import to_openapi as convert
+except ImportError:
+    from voluptuous_openapi import convert
 
 from . import OllamaCloudConfigEntry
 from .const import (
@@ -239,6 +245,18 @@ class OllamaCloudBaseLLMEntity(Entity):
                     chat_log.llm_api.custom_serializer
                     if chat_log.llm_api
                     else llm.selector_serializer
+                ),
+            )
+            # Ollama Cloud ignores `format`, so ask for the schema in the prompt too.
+            message_history.messages.insert(
+                0,
+                ollama.Message(
+                    role=MessageRole.SYSTEM.value,
+                    content=(
+                        "Respond only with a JSON object that matches this JSON "
+                        "schema, with no other text or formatting:\n"
+                        f"{json.dumps(output_format)}"
+                    ),
                 ),
             )
 

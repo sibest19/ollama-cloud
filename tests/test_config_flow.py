@@ -6,20 +6,27 @@ from unittest.mock import MagicMock
 
 import httpx
 import pytest
+import respx
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_API_KEY, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ollama_cloud.const import CONF_MODEL, DOMAIN
+from custom_components.ollama_cloud.const import (
+    CONF_MODEL,
+    DEFAULT_MODEL,
+    DOMAIN,
+    MODEL_NAMES,
+)
 
-from .conftest import TEST_API_KEY, make_http_status_error
+from .conftest import TEST_API_KEY
 
 
 async def test_user_flow_success(
     hass: HomeAssistant,
     mock_ollama_client: MagicMock,
+    mock_api_me: respx.Route,
 ) -> None:
     """A valid API key creates an entry with the two default subentries."""
     result = await hass.config_entries.flow.async_init(
@@ -38,14 +45,14 @@ async def test_user_flow_success(
 
     subentry_types = sorted(sub["subentry_type"] for sub in result["subentries"])
     assert subentry_types == ["ai_task_data", "conversation"]
-    mock_ollama_client.list.assert_awaited()
+    assert mock_api_me.called
 
 
 @pytest.mark.parametrize(
     ("side_effect", "expected_error"),
     [
-        (make_http_status_error(401), "invalid_auth"),
-        (make_http_status_error(500), "cannot_connect"),
+        (httpx.Response(401), "invalid_auth"),
+        (httpx.Response(500), "cannot_connect"),
         (httpx.ConnectError("boom"), "cannot_connect"),
         (TimeoutError(), "cannot_connect"),
         (ValueError("unexpected"), "unknown"),
@@ -56,9 +63,10 @@ async def test_user_flow_errors_then_recovers(
     mock_ollama_client: MagicMock,
     side_effect: Exception,
     expected_error: str,
+    mock_api_me: respx.Route,
 ) -> None:
     """Each failure surfaces the right error and the form recovers afterwards."""
-    mock_ollama_client.list.side_effect = side_effect
+    mock_api_me.side_effect = [side_effect]
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
@@ -71,7 +79,7 @@ async def test_user_flow_errors_then_recovers(
     assert result["errors"] == {"base": expected_error}
 
     # Clearing the error lets the user retry successfully.
-    mock_ollama_client.list.side_effect = None
+    mock_api_me.side_effect = None
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_API_KEY: TEST_API_KEY}
     )
@@ -119,15 +127,19 @@ async def test_reauth_flow_success(
     assert result["reason"] == "reauth_successful"
     assert mock_config_entry.data[CONF_API_KEY] == "new-key"
 
+    # Let the reload scheduled by the reauth finish before the test tears down.
+    await hass.async_block_till_done()
+
 
 async def test_reauth_flow_invalid_auth(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     mock_ollama_client: MagicMock,
+    mock_api_me: respx.Route,
 ) -> None:
     """A bad key during reauth surfaces invalid_auth."""
     mock_config_entry.add_to_hass(hass)
-    mock_ollama_client.list.side_effect = make_http_status_error(401)
+    mock_api_me.side_effect = [httpx.Response(401)]
 
     result = await mock_config_entry.start_reauth_flow(hass)
     result = await hass.config_entries.flow.async_configure(
@@ -165,3 +177,31 @@ async def test_conversation_subentry_flow(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "My Agent"
     assert result["data"][CONF_MODEL] == "gpt-oss:120b"
+
+
+async def test_subentry_flow_lists_new_cloud_models(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_ollama_client: MagicMock,
+) -> None:
+    """Models Ollama Cloud returns are offered even if not in the built-in list."""
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    mock_ollama_client.list.return_value = {"models": [{"model": "brand-new-model"}]}
+
+    result = await hass.config_entries.subentries.async_init(
+        (mock_config_entry.entry_id, "conversation"),
+        context={"source": SOURCE_USER},
+    )
+
+    model_selector = next(
+        value
+        for key, value in result["data_schema"].schema.items()
+        if key == CONF_MODEL
+    )
+    offered = [option["value"] for option in model_selector.config["options"]]
+    assert "brand-new-model" in offered
+    # The built-in list still backs up the live one.
+    assert set(MODEL_NAMES) <= set(offered)
+    assert DEFAULT_MODEL in MODEL_NAMES
