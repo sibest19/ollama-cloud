@@ -12,7 +12,7 @@ This custom integration allows you to use [Ollama Cloud](https://ollama.com) as 
 
 - **Conversation Agent**: Use Ollama Cloud models as your Home Assistant voice assistant
 - **AI Task Support**: Generate structured data using Ollama Cloud models
-- **Multiple Models**: Access cloud-hosted models including LLaMA 3.3, Qwen 3, DeepSeek R1, Mistral Large, and more
+- **Multiple Models**: Choose from every model currently available on Ollama Cloud
 - **Streaming Responses**: Real-time streaming for responsive conversations
 - **Tool Calling**: Control Home Assistant devices through natural language
 - **Thinking Mode**: Optional reasoning mode for improved response quality
@@ -45,22 +45,12 @@ This custom integration allows you to use [Ollama Cloud](https://ollama.com) as 
 
 ## Available Models
 
-The integration supports various cloud models hosted on Ollama Cloud:
+When you add or configure an agent, the model list is loaded live from Ollama Cloud,
+so new models show up without updating the integration.
 
-- Cogito 2.1 (671B)
-- DeepSeek v3.1 (671B), v3.2
-- Devstral 2 (123B), Small 2 (24B)
-- Gemini 3 Pro/Flash Preview
-- Gemma 3 (4B, 12B, 27B)
-- GLM 4.6, 4.7
-- GPT-OSS (20B, 120B)
-- Kimi K2 (1T), K2.5, K2-Thinking
-- MiniMax M2, M2.1
-- Ministral 3 (3B, 8B, 14B)
-- Mistral Large 3 (675B)
-- Nemotron 3 Nano (30B)
-- Qwen 3 Coder (480B), Next (80B), VL (235B)
-- RNJ-1 (8B)
+The default model is `gpt-oss:20b`, which is included in Ollama Cloud's free usage.
+Other models may need paid usage credits; if a model isn't included in your plan,
+requests fail with an error asking you to add credits at https://ollama.com/settings.
 
 ## Options
 
