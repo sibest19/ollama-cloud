@@ -74,8 +74,32 @@ Each conversation agent/AI task can be configured with:
 
 ## Requirements
 
-- Home Assistant 2025.2.4 or later
+- Home Assistant 2025.8.0 or later
 - An Ollama Cloud API key
+
+## Development
+
+A `Makefile` wraps the common tasks (run `make help` to list them).
+
+Run a local Home Assistant with the integration mounted (requires Docker):
+
+```bash
+make up      # start Home Assistant at http://localhost:8123
+make logs    # follow the logs
+make restart # reload after editing the integration
+make down    # stop and remove the container
+```
+
+`make dev` starts the container and tails the logs in one step. Home Assistant's
+runtime files are written to `config/` (git-ignored except `configuration.yaml`).
+
+Install the dev/test dependencies and run the checks:
+
+```bash
+make setup   # pip install -r requirements.test.txt
+make lint    # ruff check + format --check
+make test    # pytest with coverage
+```
 
 ## Disclaimer
 

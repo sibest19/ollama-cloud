@@ -1,18 +1,18 @@
-name: Lint
+name: Test
 
 on:
   push:
     branches:
-      - "main"
+      - main
   pull_request:
     branches:
-      - "main"
+      - main
 
 permissions: {}
 
 jobs:
-  ruff:
-    name: "Ruff"
+  pytest:
+    name: "Pytest"
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout the repository
@@ -25,10 +25,7 @@ jobs:
           cache: "pip"
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements.txt
+        run: python3 -m pip install -r requirements.test.txt
 
-      - name: Lint
-        run: python3 -m ruff check .
-
-      - name: Format
-        run: python3 -m ruff format . --check
+      - name: Run tests
+        run: python3 -m pytest

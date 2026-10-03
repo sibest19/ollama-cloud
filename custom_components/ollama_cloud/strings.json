@@ -1,0 +1,92 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Service is already configured",
+            "reauth_successful": "Re-authentication was successful"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "api_key": "API key"
+                },
+                "data_description": {
+                    "api_key": "Create an API key at {api_key_url}"
+                }
+            },
+            "reauth_confirm": {
+                "data": {
+                    "api_key": "API key"
+                },
+                "data_description": {
+                    "api_key": "Create an API key at {api_key_url}"
+                },
+                "description": "Please re-enter your Ollama Cloud API key"
+            }
+        }
+    },
+    "config_subentries": {
+        "ai_task_data": {
+            "abort": {
+                "cannot_connect": "Failed to connect",
+                "entry_not_loaded": "Failed to add agent. The configuration is disabled.",
+                "reconfigure_successful": "Re-configuration was successful"
+            },
+            "entry_type": "AI task",
+            "initiate_flow": {
+                "reconfigure": "Reconfigure AI task",
+                "user": "Add AI task"
+            },
+            "step": {
+                "set_options": {
+                    "data": {
+                        "max_history": "Max history messages",
+                        "model": "Model",
+                        "name": "Name",
+                        "think": "Think before responding"
+                    },
+                    "data_description": {
+                        "think": "If enabled, the LLM will think before responding. This can improve response quality but may increase latency."
+                    }
+                }
+            }
+        },
+        "conversation": {
+            "abort": {
+                "cannot_connect": "Failed to connect",
+                "entry_not_loaded": "Failed to add agent. The configuration is disabled.",
+                "reconfigure_successful": "Re-configuration was successful"
+            },
+            "entry_type": "Conversation agent",
+            "initiate_flow": {
+                "reconfigure": "Reconfigure conversation agent",
+                "user": "Add conversation agent"
+            },
+            "step": {
+                "set_options": {
+                    "data": {
+                        "llm_hass_api": "Control Home Assistant",
+                        "max_history": "Max history messages",
+                        "model": "Model",
+                        "name": "Name",
+                        "prompt": "Instructions",
+                        "think": "Think before responding"
+                    },
+                    "data_description": {
+                        "prompt": "Instruct how the LLM should respond. This can be a template.",
+                        "think": "If enabled, the LLM will think before responding. This can improve response quality but may increase latency."
+                    }
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "unsupported_attachment_type": {
+            "message": "Ollama Cloud only supports image attachments in user content, but received non-image attachment."
+        }
+    }
+}

@@ -9,6 +9,7 @@ select = [
 
 ignore = [
     "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "CPY001", # Missing copyright notice (licensed via LICENSE file)
     "D203", # no-blank-line-before-class (incompatible with formatter)
     "D212", # multi-line-summary-first-line (incompatible with formatter)
     "COM812", # incompatible with formatter
@@ -25,6 +26,15 @@ ignore = [
     "PLR2004", # Magic value used in comparison (HTTP status codes are fine)
     "FBT001", # Boolean-typed positional argument in function definition
     "TRY400", # Use logging.exception instead of logging.error
+]
+
+[lint.per-file-ignores]
+# Tests are allowed to use asserts and other patterns unsuitable for library code.
+"tests/*" = [
+    "S101", # Use of assert detected
+    "D213", # Multi-line docstring summary should start at the second line
+    "PT022", # No teardown in fixture, use return instead of yield
+    "SLF001", # Private member accessed (tests exercise internal helpers)
 ]
 
 [lint.flake8-pytest-style]

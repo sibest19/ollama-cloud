@@ -1,0 +1,14 @@
+services:
+  homeassistant:
+    container_name: ollama-cloud-dev
+    image: ghcr.io/home-assistant/home-assistant:stable
+    ports:
+      - "8123:8123"
+    volumes:
+      # Home Assistant config (runtime files land here, git-ignored)
+      - ./config:/config
+      # Live-mount the integration so local edits show up on restart
+      - ./custom_components:/config/custom_components:ro
+    environment:
+      - TZ=Europe/Rome
+    restart: unless-stopped

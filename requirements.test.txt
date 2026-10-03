@@ -1,0 +1,14 @@
+-r requirements.txt
+
+# Keep in lockstep with the homeassistant pin in requirements.txt
+pytest-homeassistant-custom-component==0.13.367
+ollama==0.6.2
+voluptuous-openapi==0.4.1
+
+# Runtime requirements of HA's conversation component (normally installed by HA on demand)
+gazetteer-matcher==1.1.0
+hassil==3.12.1
+home-assistant-intents==2026.8.28
+
+# Runtime requirements of HA's camera component (imported by ai_task)
+PyTurboJPEG==1.8.3

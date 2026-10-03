@@ -1,0 +1,92 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Il servizio è già configurato",
+            "reauth_successful": "La ri-autenticazione è avvenuta con successo"
+        },
+        "error": {
+            "cannot_connect": "Impossibile connettersi",
+            "invalid_auth": "Autenticazione non valida",
+            "unknown": "Errore imprevisto"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "api_key": "Chiave API"
+                },
+                "data_description": {
+                    "api_key": "Crea una chiave API su {api_key_url}"
+                }
+            },
+            "reauth_confirm": {
+                "data": {
+                    "api_key": "Chiave API"
+                },
+                "data_description": {
+                    "api_key": "Crea una chiave API su {api_key_url}"
+                },
+                "description": "Reinserisci la tua chiave API di Ollama Cloud"
+            }
+        }
+    },
+    "config_subentries": {
+        "ai_task_data": {
+            "abort": {
+                "cannot_connect": "Impossibile connettersi",
+                "entry_not_loaded": "Impossibile aggiungere l'agente. La configurazione è disabilitata.",
+                "reconfigure_successful": "La riconfigurazione è avvenuta con successo"
+            },
+            "entry_type": "Attività IA",
+            "initiate_flow": {
+                "reconfigure": "Riconfigura attività IA",
+                "user": "Aggiungi attività IA"
+            },
+            "step": {
+                "set_options": {
+                    "data": {
+                        "max_history": "Numero massimo di messaggi nella cronologia",
+                        "model": "Modello",
+                        "name": "Nome",
+                        "think": "Rifletti prima di rispondere"
+                    },
+                    "data_description": {
+                        "think": "Se abilitato, l'LLM rifletterà prima di rispondere. Questo può migliorare la qualità della risposta ma potrebbe aumentare la latenza."
+                    }
+                }
+            }
+        },
+        "conversation": {
+            "abort": {
+                "cannot_connect": "Impossibile connettersi",
+                "entry_not_loaded": "Impossibile aggiungere l'agente. La configurazione è disabilitata.",
+                "reconfigure_successful": "La riconfigurazione è avvenuta con successo"
+            },
+            "entry_type": "Agente conversazionale",
+            "initiate_flow": {
+                "reconfigure": "Riconfigura agente conversazionale",
+                "user": "Aggiungi agente conversazionale"
+            },
+            "step": {
+                "set_options": {
+                    "data": {
+                        "llm_hass_api": "Controlla Home Assistant",
+                        "max_history": "Numero massimo di messaggi nella cronologia",
+                        "model": "Modello",
+                        "name": "Nome",
+                        "prompt": "Istruzioni",
+                        "think": "Rifletti prima di rispondere"
+                    },
+                    "data_description": {
+                        "prompt": "Indica all'LLM come deve rispondere. Può essere un template.",
+                        "think": "Se abilitato, l'LLM rifletterà prima di rispondere. Questo può migliorare la qualità della risposta ma potrebbe aumentare la latenza."
+                    }
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "unsupported_attachment_type": {
+            "message": "Ollama Cloud supporta solo allegati di tipo immagine nei contenuti utente, ma è stato ricevuto un allegato non immagine."
+        }
+    }
+}

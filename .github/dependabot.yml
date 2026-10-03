@@ -4,17 +4,28 @@ updates:
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
     ignore:
-      # Dependabot should not update Home Assistant as that should match the homeassistant key in hacs.json
+      # Home Assistant and pytest-homeassistant-custom-component must be bumped
+      # together by hand: each phacc release pins an exact homeassistant version
+      # (including betas), so independent bumps leave requirements unresolvable.
       - dependency-name: "homeassistant"
+      - dependency-name: "pytest-homeassistant-custom-component"
