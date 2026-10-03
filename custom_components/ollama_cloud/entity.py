@@ -15,7 +15,13 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import llm
 from homeassistant.helpers.entity import Entity
-from voluptuous_openapi import convert
+
+try:
+    # Home Assistant 2026.9 replaced voluptuous with probatio, whose schemas
+    # voluptuous_openapi cannot convert.
+    from probatio import to_openapi as convert
+except ImportError:
+    from voluptuous_openapi import convert
 
 from . import OllamaCloudConfigEntry
 from .const import (
