@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
+import respx
 from homeassistant.config_entries import ConfigSubentryData
 from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
@@ -19,6 +20,7 @@ from custom_components.ollama_cloud.const import (
     DEFAULT_CONVERSATION_NAME,
     DEFAULT_MODEL,
     DOMAIN,
+    OLLAMA_CLOUD_HOST,
     RECOMMENDED_CONVERSATION_OPTIONS,
 )
 
@@ -44,13 +46,13 @@ async def setup_core_components(hass: HomeAssistant) -> None:
     assert await async_setup_component(hass, "homeassistant", {})
 
 
-def make_http_status_error(status_code: int) -> httpx.HTTPStatusError:
-    """Build an httpx.HTTPStatusError with the given status code."""
-    request = httpx.Request("GET", "https://ollama.com/api/tags")
-    response = httpx.Response(status_code, request=request)
-    return httpx.HTTPStatusError(
-        f"HTTP {status_code}", request=request, response=response
-    )
+@pytest.fixture(autouse=True)
+def mock_api_me() -> Generator[respx.Route]:
+    """Mock the account endpoint used to validate the API key (valid by default)."""
+    with respx.mock(assert_all_called=False) as router:
+        yield router.post(f"{OLLAMA_CLOUD_HOST}/api/me").mock(
+            return_value=httpx.Response(200, json={})
+        )
 
 
 @pytest.fixture

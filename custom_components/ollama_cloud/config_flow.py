@@ -35,7 +35,7 @@ from homeassistant.helpers.selector import (
     TextSelectorType,
 )
 
-from . import OllamaCloudConfigEntry
+from . import OllamaCloudConfigEntry, async_validate_api_key
 from .const import (
     CONF_MAX_HISTORY,
     CONF_MODEL,
@@ -49,7 +49,6 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     MODEL_NAMES,
-    OLLAMA_CLOUD_HOST,
     RECOMMENDED_CONVERSATION_OPTIONS,
 )
 
@@ -63,16 +62,6 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         ),
     }
 )
-
-
-async def validate_api_key(api_key: str) -> None:
-    """Validate the API key by making a test request."""
-    client = ollama.AsyncClient(
-        host=OLLAMA_CLOUD_HOST,
-        headers={"Authorization": f"Bearer {api_key}"},
-    )
-    async with asyncio.timeout(DEFAULT_TIMEOUT):
-        await client.list()
 
 
 class OllamaCloudConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -91,13 +80,13 @@ class OllamaCloudConfigFlow(ConfigFlow, domain=DOMAIN):
             self._async_abort_entries_match(user_input)
 
             try:
-                await validate_api_key(user_input[CONF_API_KEY])
-            except httpx.HTTPStatusError as err:
-                if err.response.status_code == 401:
+                await async_validate_api_key(self.hass, user_input[CONF_API_KEY])
+            except ollama.ResponseError as err:
+                if err.status_code == 401:
                     errors["base"] = "invalid_auth"
                 else:
                     errors["base"] = "cannot_connect"
-            except (TimeoutError, httpx.ConnectError):
+            except (TimeoutError, ConnectionError, httpx.HTTPError):
                 errors["base"] = "cannot_connect"
             except Exception:
                 _LOGGER.exception("Unexpected exception")
@@ -147,13 +136,13 @@ class OllamaCloudConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                await validate_api_key(user_input[CONF_API_KEY])
-            except httpx.HTTPStatusError as err:
-                if err.response.status_code == 401:
+                await async_validate_api_key(self.hass, user_input[CONF_API_KEY])
+            except ollama.ResponseError as err:
+                if err.status_code == 401:
                     errors["base"] = "invalid_auth"
                 else:
                     errors["base"] = "cannot_connect"
-            except (TimeoutError, httpx.ConnectError):
+            except (TimeoutError, ConnectionError, httpx.HTTPError):
                 errors["base"] = "cannot_connect"
             except Exception:
                 _LOGGER.exception("Unexpected exception")
@@ -221,7 +210,12 @@ class OllamaCloudSubentryFlowHandler(ConfigSubentryFlow):
                 available_models: set[str] = {
                     model_info["model"] for model_info in response.get("models", [])
                 }
-            except (TimeoutError, httpx.ConnectError, httpx.HTTPError):
+            except (
+                TimeoutError,
+                ConnectionError,
+                httpx.HTTPError,
+                ollama.ResponseError,
+            ):
                 _LOGGER.exception("Failed to get models from Ollama Cloud")
                 return self.async_abort(reason="cannot_connect")
 
