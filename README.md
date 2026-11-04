@@ -2,95 +2,80 @@
   <img src="images/icon.png" alt="Ollama" width="100">
 </p>
 
-# Ollama Cloud Integration for Home Assistant
+# Ollama Cloud for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-This custom integration allows you to use [Ollama Cloud](https://ollama.com) as a conversation agent and AI task provider in Home Assistant.
+Use [Ollama Cloud](https://ollama.com) models as a **conversation agent** (Assist / voice) and an
+**AI Task** provider in Home Assistant. It supports streaming replies, device control through tool
+calling, an optional thinking mode, and a live list of every model on Ollama Cloud.
 
-## Features
+**You need** Home Assistant 2025.9 or newer and an [Ollama Cloud API key](https://ollama.com/settings/keys).
 
-- **Conversation Agent**: Use Ollama Cloud models as your Home Assistant voice assistant
-- **AI Task Support**: Generate structured data using Ollama Cloud models
-- **Multiple Models**: Choose from every model currently available on Ollama Cloud
-- **Streaming Responses**: Real-time streaming for responsive conversations
-- **Tool Calling**: Control Home Assistant devices through natural language
-- **Thinking Mode**: Optional reasoning mode for improved response quality
+## Install
 
-## Installation
+Click the button, or follow the steps for your Home Assistant version:
 
-### HACS (Recommended)
+[![Open in your Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sibest19&repository=ollama-cloud&category=integration)
 
-1. Open HACS in your Home Assistant instance [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sibest19&repository=ollama-cloud&category=integration)
-2. Click on "Integrations"
-3. Click the three dots in the top right corner
-4. Select "Custom repositories"
-5. Add this repository URL and select "Integration" as the category
-6. Click "Add"
-7. Search for "Ollama Cloud" and install it
-8. Restart Home Assistant
+<details open>
+<summary><b>Home Assistant 2026.11 and newer: Marketplace</b></summary>
 
-### Manual Installation
+1. Go to **Settings → Marketplace**. If this is your first time, accept the warning.
+2. Top right, select **Add from link**.
+3. Under **GitHub link**, enter `sibest19/ollama-cloud`, then select **Add**. If you are asked
+   for a type, choose **Integration**.
+4. Open **Ollama Cloud** in the list, install it, then restart Home Assistant.
 
-1. Copy the `custom_components/ollama_cloud` directory to your Home Assistant `custom_components` folder
-2. Restart Home Assistant
+Upgrading from HACS? You don't need to do anything. The Marketplace takes over your HACS install
+and keeps updating it.
+</details>
 
-## Configuration
+<details>
+<summary><b>Home Assistant 2026.10 and older: HACS</b></summary>
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **Add Integration**
-3. Search for "Ollama Cloud"
-4. Enter your Ollama Cloud API key (get one at https://ollama.com/settings/keys)
-5. The integration will automatically create a conversation agent and AI task entity
+1. Open **HACS**, then **⋮ → Custom repositories**.
+2. Add `https://github.com/sibest19/ollama-cloud` with the **Integration** type.
+3. Search for **Ollama Cloud**, download it, then restart Home Assistant.
+</details>
 
-## Available Models
+<details>
+<summary><b>Manual</b></summary>
 
-When you add or configure an agent, the model list is loaded live from Ollama Cloud,
-so new models show up without updating the integration.
+Copy `custom_components/ollama_cloud` into your Home Assistant `config/custom_components/`
+folder, then restart Home Assistant. You will have to update it by hand.
+</details>
 
-The default model is `gpt-oss:20b`, which is included in Ollama Cloud's free usage.
-Other models may need paid usage credits; if a model isn't included in your plan,
-requests fail with an error asking you to add credits at https://ollama.com/settings.
+## Set up
+
+1. Go to **Settings → Devices & services → Add integration**, then pick **Ollama Cloud**.
+2. Paste your API key. This creates a conversation agent and an AI Task entity.
+3. To use the agent in Assist, go to **Settings → Voice assistants**, open your assistant and set
+   **Conversation agent** to Ollama Cloud.
 
 ## Options
 
-Each conversation agent/AI task can be configured with:
+On the integration page, select **Reconfigure** on an agent or AI Task to change it. You can also
+add more of either, for example one per model.
 
-- **Model**: Select which cloud model to use
-- **Instructions**: Custom prompt to guide the LLM behavior
-- **Control Home Assistant**: Enable tool calling to control devices
-- **Max History Messages**: Number of conversation turns to keep in context
-- **Think Before Responding**: Enable reasoning mode for improved responses
+| Option | What it does |
+| --- | --- |
+| Model | The Ollama Cloud model to use. The list is loaded live, so new models appear without an update. |
+| Instructions | A custom prompt that guides the model. Conversation agent only. |
+| Control Home Assistant | Lets the model call Home Assistant tools to control your devices. Conversation agent only. |
+| Max history messages | How many conversation turns stay in the context. |
+| Think before responding | Turns on reasoning mode, which is slower but often gives better answers. |
 
-## Requirements
+The default model, `gpt-oss:20b`, is included in Ollama Cloud's free usage. Other models may need
+paid credits. If your plan doesn't include a model, its requests fail with an error asking you to
+add credits at [ollama.com/settings](https://ollama.com/settings).
 
-- Home Assistant 2025.9.0 or later
-- An Ollama Cloud API key
+## Help and contributing
 
-## Development
+Found a bug or want a feature? [Open an issue](https://github.com/sibest19/ollama-cloud/issues/new/choose).
+To work on the code, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-A `Makefile` wraps the common tasks (run `make help` to list them).
+---
 
-Run a local Home Assistant with the integration mounted (requires Docker):
-
-```bash
-make up      # start Home Assistant at http://localhost:8123
-make logs    # follow the logs
-make restart # reload after editing the integration
-make down    # stop and remove the container
-```
-
-`make dev` starts the container and tails the logs in one step. Home Assistant's
-runtime files are written to `config/` (git-ignored except `configuration.yaml`).
-
-Install the dev/test dependencies and run the checks:
-
-```bash
-make setup   # pip install -r requirements.test.txt
-make lint    # ruff check + format --check
-make test    # pytest with coverage
-```
-
-## Disclaimer
-
-This project is not affiliated with, endorsed by, or sponsored by Ollama, Inc. The Ollama name and logo are trademarks of Ollama, Inc. This integration is an independent, community-driven project that uses the publicly available Ollama Cloud API.
+This project isn't affiliated with, endorsed by or sponsored by Ollama, Inc. Ollama and its logo
+are trademarks of Ollama, Inc.
