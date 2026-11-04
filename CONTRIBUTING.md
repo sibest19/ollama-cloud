@@ -60,10 +60,12 @@ file.
 
 1. Run the **Prepare release** workflow from the Actions tab, picking the version part to
    bump and whether it is a beta. It bumps `manifest.json` on a `release/<version>` branch
-   and opens a PR with the changelog GitHub generates from the merged PRs.
+   and opens a draft PR with the changelog GitHub generates from the merged PRs.
 2. The **Release notes** agent ([`release-notes.md`](.github/workflows/release-notes.md),
    a [gh-aw](https://github.com/github/gh-aw) workflow) rewrites the PR description into
-   notes for users within a few minutes. Review and edit them in the PR. After changing
+   notes for users within a few minutes, then marks the PR ready for review. Review and
+   edit the notes in the PR. If the agent fails, rewrite them yourself and mark the PR
+   ready by hand. After changing
    `release-notes.md`, run `gh aw compile` and commit the regenerated `.lock.yml`.
 3. Merge the PR. The **Publish release** workflow tags `v<version>` and creates the GitHub
    release with the PR description as its notes; betas become pre-releases.

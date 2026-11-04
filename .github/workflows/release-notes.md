@@ -29,6 +29,9 @@ safe-outputs:
     # The PR description becomes the published release notes.
     footer: false
     max: 1
+  mark-pull-request-as-ready-for-review:
+    target: ${{ github.event.inputs.pr }}
+    max: 1
 
 concurrency:
   job-discriminator: ${{ github.event.inputs.pr }}
@@ -82,5 +85,7 @@ in a minute and act on.
 
 ## Output
 
-Update PR #${{ github.event.inputs.pr }} once, replacing its description with the notes.
-Do not change its title, and do not touch any other PR or issue.
+1. Update PR #${{ github.event.inputs.pr }} once, replacing its description with the notes.
+   Do not change its title, and do not touch any other PR or issue.
+2. Then mark the same PR as ready for review, with the reason `Release notes rewritten.`
+   It opens as a draft so it cannot be merged, and published, with the raw changelog.
