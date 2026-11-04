@@ -7,25 +7,71 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    # Daily, so a new Home Assistant release is tested without waiting for a PR
+    - cron: "0 7 * * *"
+  workflow_dispatch:
 
 permissions: {}
 
 jobs:
   pytest:
-    name: "Pytest"
+    name: "Pytest (HA ${{ matrix.homeassistant }})"
     runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The oldest version hacs.json lets users install on
+          - homeassistant: minimum
+            python: "3.13"
+          # The versions in requirements.test.txt, used for local development
+          - homeassistant: pinned
+            python: "3.14"
+          # The newest version pytest-homeassistant-custom-component supports
+          - homeassistant: latest
+            python: "3.14"
     steps:
       - name: Checkout the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.14"
-          cache: "pip"
+        run: uv venv --python "${{ matrix.python }}"
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements.test.txt
+        env:
+          TARGET: ${{ matrix.homeassistant }}
+        run: |
+          if [ "$TARGET" = pinned ]; then
+            uv pip install -r requirements.test.txt
+            exit 0
+          fi
+          if [ "$TARGET" = minimum ]; then
+            # Each plugin release pins one Home Assistant version, so uv picks the matching one.
+            # Old releases leave pycares unpinned, and pycares 5 breaks the aiodns they use.
+            uv pip install "homeassistant==$(jq -r .homeassistant hacs.json)" pytest-homeassistant-custom-component "pycares<5"
+          else
+            uv pip install pytest-homeassistant-custom-component
+          fi
+          # Install what Home Assistant would: our requirements plus those of the components we
+          # use, constrained like Home Assistant does at runtime.
+          ha="$(.venv/bin/python -c 'import homeassistant, os; print(os.path.dirname(homeassistant.__file__))')"
+          jq -r '.requirements[]?' custom_components/ollama_cloud/manifest.json \
+            "$ha/components/conversation/manifest.json" "$ha/components/camera/manifest.json" > /tmp/requirements.txt
+          uv pip install -r /tmp/requirements.txt -c "$ha/package_constraints.txt"
+
+      - name: Check installed versions
+        env:
+          TARGET: ${{ matrix.homeassistant }}
+        run: |
+          uv pip check
+          uv pip list | grep -E '^(homeassistant|pytest-homeassistant-custom-component|ollama) '
+          if [ "$TARGET" = minimum ]; then
+            test "$(uv pip show homeassistant | sed -n 's/^Version: //p')" = "$(jq -r .homeassistant hacs.json)"
+          fi
 
       - name: Run tests
-        run: python3 -m pytest
+        run: .venv/bin/python -m pytest
