@@ -51,12 +51,14 @@ async def test_generate_structured_data(
             "population_millions": {"type": "number"},
         },
         "required": ["capital", "population_millions"],
-        "additionalProperties": False,
     }
     assert result.data == {"capital": "Rome", "population_millions": 2.8}
     chat_kwargs = mock_ollama_client.chat.await_args.kwargs
-    assert chat_kwargs["format"] == expected_schema
+    schema = dict(chat_kwargs["format"])
     # Ollama Cloud ignores `format`, so the schema is also given in the prompt.
     first_message = chat_kwargs["messages"][0]
     assert first_message["role"] == "system"
-    assert json.dumps(expected_schema) in first_message["content"]
+    assert json.dumps(schema) in first_message["content"]
+    # voluptuous-openapi < 0.2 (pinned by HA < 2026.2) leaves additionalProperties out.
+    assert schema.pop("additionalProperties", False) is False
+    assert schema == expected_schema

@@ -95,10 +95,12 @@ def _convert_content(
 ) -> ollama.Message:
     """Create tool response content."""
     if isinstance(chat_content, conversation.ToolResultContent):
-        return ollama.Message(
-            role=MessageRole.TOOL.value,
-            content=json.dumps(chat_content.tool_result),
-        )
+        # HA 2026.10 moved the data to `result` and deprecated `tool_result`.
+        if hasattr(chat_content, "result"):
+            data = chat_content.result.data
+        else:
+            data = chat_content.tool_result
+        return ollama.Message(role=MessageRole.TOOL.value, content=json.dumps(data))
     if isinstance(chat_content, conversation.AssistantContent):
         return ollama.Message(
             role=MessageRole.ASSISTANT.value,

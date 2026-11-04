@@ -1,0 +1,16 @@
+# Groups the draft notes the Prepare release workflow generates
+changelog:
+  exclude:
+    authors:
+      # The release PRs themselves
+      - github-actions[bot]
+  categories:
+    - title: Changes
+      labels:
+        - "*"
+      exclude:
+        labels:
+          - dependencies
+    - title: Dependencies
+      labels:
+        - dependencies

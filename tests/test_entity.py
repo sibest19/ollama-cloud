@@ -65,14 +65,16 @@ def test_format_tool_converts_parameters_to_json_schema() -> None:
     assert spec["type"] == "function"
     assert spec["function"]["name"] == "set_brightness"
     assert spec["function"]["description"] == "Set a light's brightness"
-    assert spec["function"]["parameters"] == {
+    params = dict(spec["function"]["parameters"])
+    # voluptuous-openapi < 0.2 (pinned by HA < 2026.2) leaves additionalProperties out.
+    assert params.pop("additionalProperties", False) is False
+    assert params == {
         "type": "object",
         "properties": {
             "name": {"type": "string"},
             "brightness": {"type": "integer", "minimum": 0, "maximum": 100},
         },
         "required": ["name"],
-        "additionalProperties": False,
     }
     # The Ollama client validates tools with pydantic; this must not raise.
     ollama.Tool.model_validate(spec)
@@ -87,12 +89,14 @@ def test_convert_content_roundtrips_roles() -> None:
     system = _convert_content(conversation.SystemContent(content="be nice"))
     assert system["role"] == MessageRole.SYSTEM.value
 
+    # HA 2026.10 replaced `tool_result` with `result`, an llm.ToolResult.
+    if hasattr(llm, "ToolResult"):
+        result = {"result": llm.ToolResult(data={"state": "on"})}
+    else:
+        result = {"tool_result": {"state": "on"}}
     tool_result = _convert_content(
         conversation.ToolResultContent(
-            agent_id="agent",
-            tool_call_id="call-1",
-            tool_name="get_state",
-            tool_result={"state": "on"},
+            agent_id="agent", tool_call_id="call-1", tool_name="get_state", **result
         )
     )
     assert tool_result["role"] == MessageRole.TOOL.value
