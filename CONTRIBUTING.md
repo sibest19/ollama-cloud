@@ -1,75 +1,87 @@
-# Contribution guidelines
+# Contributing
 
-Contributing to this project should be as easy and transparent as possible, whether it's:
+Thanks for helping out! Bug reports, fixes and feature ideas are all welcome.
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
+- **Bugs and ideas:** [open an issue](../../issues/new/choose) with one of the templates. For
+  bugs, include your Home Assistant version, the model you used, and the logs.
+- **Code:** fork the repository, branch from `main`, and open a pull request.
 
-## Github is used for everything
+## Project layout
 
-Github is used to host code, to track issues and feature requests, as well as accept pull requests.
+```text
+custom_components/ollama_cloud/
+  __init__.py        # set-up, API client and key validation
+  config_flow.py     # API key flow and per-agent options (model, prompt, tools, thinking)
+  entity.py          # shared chat logic: streaming, tool calls, message history
+  conversation.py    # conversation agent entity
+  ai_task.py         # AI Task entity (generate data, structured output)
+  models.py          # message roles and chat history types
+  const.py           # constants and defaults
+  strings.json       # UI text (keep translations/ in sync)
+  manifest.json      # version and Python requirements
+tests/               # pytest suite using pytest-homeassistant-custom-component
+hacs.json            # minimum Home Assistant version for HACS and the Marketplace
+```
 
-Pull requests are the best way to propose changes to the codebase.
+## Set up
 
-1. Fork the repo and create your branch from `main`.
-2. If you've changed something, update the documentation.
-3. Make sure your code lints (using `scripts/lint`).
-4. Test you contribution.
-5. Issue that pull request!
+You need Python 3.13 or newer, and Docker if you want to run Home Assistant locally. `make help`
+lists every task.
 
-## Any contributions you make will be under the MIT Software License
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+make setup   # install the test and dev dependencies
+```
 
-In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
+## Run it in Home Assistant
 
-## Report bugs using Github's [issues](../../issues)
+```bash
+make dev      # start Home Assistant at http://localhost:8123 and follow the logs
+make restart  # pick up your code changes
+make down     # stop and remove the container
+```
 
-GitHub issues are used to track public bugs.
-Report a bug by [opening a new issue](../../issues/new/choose); it's that easy!
+The integration folder is mounted read-only into the container. Home Assistant writes its runtime
+files to `config/`, which git ignores except for `configuration.yaml`.
 
-## Write bug reports with detail, background, and sample code
+## Check your change
 
-**Great Bug Reports** tend to have:
+```bash
+make format  # auto-format and auto-fix with ruff
+make lint    # what CI runs: ruff check and format check
+make test    # pytest with coverage
+```
 
-- A quick summary and/or background
-- Steps to reproduce
-  - Be specific!
-  - Give sample code if you can.
-- What you expected would happen
-- What actually happens
-- Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
+CI runs the tests against three Home Assistant versions: the minimum in `hacs.json`, the version
+pinned in `requirements.test.txt`, and the latest one. If you use a Home Assistant API that is
+newer than the minimum, keep a fallback for older versions. CI also runs `hassfest` and the HACS
+validation.
 
-People *love* thorough bug reports. I'm not even kidding.
+When you bump `homeassistant` in `requirements.txt`, bump `pytest-homeassistant-custom-component`
+in `requirements.test.txt` to the release that matches it.
 
-## Use a Consistent Coding Style
+## Pull requests
 
-Use [black](https://github.com/ambv/black) to make sure the code follows the style.
+- Keep each PR focused on one thing, and add or update tests for any change in behaviour.
+- Update `README.md` when users would notice the change.
+- Leave the version in `manifest.json` as it is. The release workflow bumps it.
+- PR titles and descriptions feed the release notes, so describe the change for users.
 
-## Test your code modification
+## Releasing (maintainers)
 
-This custom component is based on [integration_blueprint template](https://github.com/ludeeus/integration_blueprint).
-
-It comes with development environment in a container, easy to launch
-if you use Visual Studio Code. With this container you will have a stand alone
-Home Assistant instance running and already configured with the included
-[`configuration.yaml`](./config/configuration.yaml)
-file.
-
-## Releasing
-
-1. Run the **Prepare release** workflow from the Actions tab, picking the version part to
-   bump and whether it is a beta. It bumps `manifest.json` on a `release/<version>` branch
-   and opens a draft PR with the changelog GitHub generates from the merged PRs.
-2. The **Release notes** agent ([`release-notes.md`](.github/workflows/release-notes.md),
-   a [gh-aw](https://github.com/github/gh-aw) workflow) rewrites the PR description into
-   notes for users within a few minutes, then marks the PR ready for review. Review and
-   edit the notes in the PR. If the agent fails, rewrite them yourself and mark the PR
-   ready by hand. After changing
+1. Run the **Prepare release** workflow from the Actions tab, picking the version part to bump and
+   whether it is a beta. It bumps `manifest.json` on a `release/<version>` branch and opens a draft
+   PR with the changelog GitHub generates from the merged PRs.
+2. Within a few minutes, the **Release notes** agent
+   ([`release-notes.md`](.github/workflows/release-notes.md), a
+   [gh-aw](https://github.com/github/gh-aw) workflow) rewrites the PR description as notes for
+   users and marks the PR ready for review. Review and edit the notes in the PR. If the agent
+   fails, write the notes yourself and mark the PR ready by hand. After changing
    `release-notes.md`, run `gh aw compile` and commit the regenerated `.lock.yml`.
-3. Merge the PR. The **Publish release** workflow tags `v<version>` and creates the GitHub
-   release with the PR description as its notes; betas become pre-releases.
+3. Merge the PR. The **Publish release** workflow tags `v<version>` and creates the GitHub release
+   with the PR description as its notes. Betas become pre-releases.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under its MIT License.
+By contributing, you agree that your contributions are licensed under the project's
+[MIT License](LICENSE).
