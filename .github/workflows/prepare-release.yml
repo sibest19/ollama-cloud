@@ -94,7 +94,9 @@ jobs:
           git switch -c "$branch"
           git commit -am "Release $VERSION"
           git push origin "$branch"
-          url="$(gh pr create --base main --head "$branch" --title "Release $VERSION" --body-file release_notes.md)"
+          # Draft until the Release notes agent rewrites the body and marks it ready, so the raw
+          # changelog cannot be merged and published by mistake.
+          url="$(gh pr create --draft --base main --head "$branch" --title "Release $VERSION" --body-file release_notes.md)"
 
           # Pushes made with the workflow token trigger no workflows, so start the checks here.
           gh workflow run test.yml --ref "$branch"
