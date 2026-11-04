@@ -1,0 +1,102 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version part to bump, from the last stable release"
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      beta:
+        description: "Make a beta (pre-release) instead of a stable release"
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  prepare:
+    name: "Prepare release"
+    if: github.ref == 'refs/heads/main'
+    runs-on: "ubuntu-latest"
+    permissions:
+      actions: write # start the checks on the release branch
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Bump the version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+          BETA: ${{ inputs.beta }}
+        run: |
+          stable="$(git tag -l 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)"
+          IFS=. read -r major minor patch <<< "${stable#v}"
+          case "$BUMP" in
+            major) version="$((major + 1)).0.0" ;;
+            minor) version="$major.$((minor + 1)).0" ;;
+            patch) version="$major.$minor.$((patch + 1))" ;;
+          esac
+          previous="$stable"
+          if [ "$BETA" = true ]; then
+            last_beta="$(git tag -l "v$version-beta.*" | sed 's/.*-beta\.//' | sort -n | tail -n1)"
+            version="$version-beta.$((${last_beta:-0} + 1))"
+            # A beta's notes cover what changed since the previous tag, beta or not.
+            previous="$(git describe --tags --abbrev=0)"
+          fi
+          if [ -z "$(git log --oneline "$previous..HEAD")" ]; then
+            echo "::error::Nothing to release: no commits since $previous"
+            exit 1
+          fi
+
+          manifest=custom_components/ollama_cloud/manifest.json
+          jq --indent 4 --arg version "$version" '.version = $version' "$manifest" > manifest.tmp
+          mv manifest.tmp "$manifest"
+
+          echo "Releasing $version (previous: $previous)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+
+      - name: Open the release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          branch="release/$VERSION"
+
+          # Draft notes from the merged PRs; the Release notes agent rewrites them in the PR.
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+            -f tag_name="v$VERSION" -f target_commitish=main -f previous_tag_name="$PREVIOUS" \
+            --jq .body > release_notes.md
+
+          # Start over if a previous run left a release branch or PR behind.
+          pr="$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')"
+          if [ -n "$pr" ]; then
+            gh pr close "$pr" --delete-branch
+          else
+            git push origin --delete "$branch" 2>/dev/null || true
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "Release $VERSION"
+          git push origin "$branch"
+          url="$(gh pr create --base main --head "$branch" --title "Release $VERSION" --body-file release_notes.md)"
+
+          # Pushes made with the workflow token trigger no workflows, so start the checks here.
+          gh workflow run test.yml --ref "$branch"
+          gh workflow run validate.yml --ref "$branch"
+          gh workflow run release-notes.lock.yml -f pr="${url##*/}"

@@ -1,0 +1,46 @@
+name: Publish release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  publish:
+    name: "Publish release"
+    if: >-
+      github.event.pull_request.merged &&
+      startsWith(github.event.pull_request.head.ref, 'release/') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout the merged commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          NOTES: ${{ github.event.pull_request.body }}
+        run: |
+          version="$(jq -r .version custom_components/ollama_cloud/manifest.json)"
+          if [ "$BRANCH" != "release/$version" ]; then
+            echo "::error::Branch $BRANCH does not match manifest version $version"
+            exit 1
+          fi
+          flags=()
+          if [[ "$version" == *-* ]]; then
+            flags+=(--prerelease)
+          fi
+          # Drop hidden markers, such as the ones the Release notes agent leaves in the PR body.
+          printf '%s\n' "$NOTES" | sed -E '/^[[:space:]]*<!--.*-->[[:space:]]*$/d' > release_notes.md
+          gh release create "v$version" --target "$MERGE_SHA" --title "v$version" \
+            --notes-file release_notes.md "${flags[@]}"
