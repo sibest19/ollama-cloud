@@ -5,6 +5,9 @@
         "assist_pipeline",
         "intent"
     ],
+    "categories": [
+        "ai_voice.ai_models"
+    ],
     "codeowners": [
         "@sibest19"
     ],
